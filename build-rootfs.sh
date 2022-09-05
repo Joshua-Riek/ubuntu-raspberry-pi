@@ -264,7 +264,7 @@ umount -lf ${chroot_dir}/dev/pts 2> /dev/null || true
 umount -lf ${chroot_dir}/* 2> /dev/null || true
 
 # Tar the entire rootfs
-cd ${chroot_dir} && tar -cpf ../ubuntu-20.04-preinstalled-server-arm64-raspi4.rootfs.tar . && cd ..
+cd ${chroot_dir} && tar -cpf ../ubuntu-20.04-preinstalled-server-arm64-pi4.rootfs.tar . && cd ..
 
 # Mount the temporary API filesystems
 mount -t proc /proc ${chroot_dir}/proc
@@ -501,7 +501,7 @@ umount -lf ${chroot_dir}/dev/pts 2> /dev/null || true
 umount -lf ${chroot_dir}/* 2> /dev/null || true
 
 # Tar the entire rootfs
-cd ${chroot_dir} && tar -cpf ../ubuntu-20.04-preinstalled-server-custom-arm64-raspi4.rootfs.tar . && cd ..
+cd ${chroot_dir} && tar -cpf ../ubuntu-20.04-preinstalled-server-custom-arm64-pi4.rootfs.tar . && cd ..
 
 # Mount the temporary API filesystems
 mkdir -p ${chroot_dir}/{proc,sys,run,dev,dev/pts}
@@ -653,9 +653,9 @@ umount -lf ${chroot_dir}/dev/pts 2> /dev/null || true
 umount -lf ${chroot_dir}/* 2> /dev/null || true
 
 # Tar the entire rootfs
-cd ${chroot_dir} && tar -cpf ../ubuntu-20.04-preinstalled-desktop-custom-arm64-raspi4.rootfs.tar . && cd ..
+cd ${chroot_dir} && tar -cpf ../ubuntu-20.04-preinstalled-desktop-custom-arm64-pi4.rootfs.tar . && cd ..
 rm -rf ${chroot_dir} && mkdir -p ${chroot_dir}
-cd ${chroot_dir} && tar -xpf ../ubuntu-20.04-preinstalled-server-arm64-raspi4.rootfs.tar . && cd ..
+cd ${chroot_dir} && tar -xpf ../ubuntu-20.04-preinstalled-server-arm64-pi4.rootfs.tar . && cd ..
 
 # Mount the temporary API filesystems
 mkdir -p ${chroot_dir}/{proc,sys,run,dev,dev/pts}
@@ -680,4 +680,4 @@ umount -lf ${chroot_dir}/dev/pts 2> /dev/null || true
 umount -lf ${chroot_dir}/* 2> /dev/null || true
 
 # Tar the entire rootfs
-cd ${chroot_dir} && tar -cpf ../ubuntu-20.04-preinstalled-desktop-arm64-raspi4.rootfs.tar . && cd ..
+cd ${chroot_dir} && tar -cpf ../ubuntu-20.04-preinstalled-desktop-arm64-pi4.rootfs.tar . && cd ..

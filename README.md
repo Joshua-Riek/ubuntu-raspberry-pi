@@ -38,7 +38,7 @@ sudo ./build.sh
 To run the Ubuntu 20.04 preinstalled image in a virtual machine:
 
 ```
-sudo ./qemu.sh build/ubuntu-20.04-preinstalled-server-arm64-raspi4.img.xz
+sudo ./qemu.sh build/ubuntu-20.04-preinstalled-server-arm64-pi4.img.xz
 ```
 
 ## Login
@@ -57,7 +57,7 @@ Password: root
 To flash the Ubuntu 20.04 preinstalled image to removable media:
 
 ```
-xz -dc build/ubuntu-20.04-preinstalled-server-arm64-raspi4.img.xz | sudo dd of=/dev/sdX bs=4k
+xz -dc build/ubuntu-20.04-preinstalled-server-arm64-pi4.img.xz | sudo dd of=/dev/sdX bs=4k
 ```
 
 > This assumes that the removable media is added as /dev/sdX and all it’s partitions are unmounted.

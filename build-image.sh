@@ -135,7 +135,7 @@ EOF
 kernel=u-boot.bin
 
 [pi4]
-#dtoverlay=vc4-kms-v3d-pi4
+dtoverlay=vc4-kms-v3d-pi4
 max_framebuffers=2
 arm_boost=1
 

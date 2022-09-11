@@ -3,35 +3,43 @@
 set -eE 
 trap 'echo Error: in $0 on line $LINENO' ERR
 
+function cleanup_loopdev {
+    sync --file-system
+    sync
+
+    if [ -b "${loop}" ]; then
+        umount "${loop}"* 2> /dev/null || true
+        losetup -d "${loop}" 2> /dev/null || true
+    fi
+}
+trap cleanup_loopdev EXIT
+
 if [ "$(id -u)" -ne 0 ]; then 
     echo "Please run as root"
     exit 1
 fi
 
-mkdir -p build && cd build
+cd "$(dirname -- "$(readlink -f -- "$0")")" && cd ..
+mkdir -p images build && cd build
 
-# Download the raspberry pi firmware
 if [ ! -d firmware ]; then
-    git clone --depth 1 --progress -b stable https://github.com/raspberrypi/firmware.git 
+    echo "Error: could not find raspberry pi firmware, please run build-rootfs.sh"
+    exit 1
 fi
 
-loop=/dev/loop1001
-
-for rootfs in *.rootfs.tar; do
+for rootfs in *.rootfs.tar.xz; do
     if [ ! -e "${rootfs}" ]; then
         echo "Error: could not find any rootfs tarfile, please run build-rootfs.sh"
         exit 1
     fi
 
-    # Ensure disk image is not mounted
-    umount "${loop}"* 2> /dev/null || true
-    losetup -d "${loop}" 2> /dev/null || true
-
     # Create an empty disk image
-    img="$(dirname "${rootfs}")/$(basename "${rootfs}" .rootfs.tar).img"
-    truncate -s "$(( $(wc -c < "${rootfs}") / 1024 / 1024 + 2048 + 512 ))M" "${img}"
+    img="../images/$(basename "${rootfs}" .rootfs.tar.xz).img"
+    size="$(xz -l "${rootfs}" | tail -n +2 | sed 's/,//g' | awk '{print int($5 + 1)}')"
+    truncate -s "$(( size + 2048 + 512 ))M" "${img}"
 
     # Create loop device for disk image
+    loop="$(losetup -f)"
     losetup "${loop}" "${img}"
     disk="${loop}"
 
@@ -69,22 +77,23 @@ for rootfs in *.rootfs.tar; do
 
     sleep 2
 
+    # Generate random uuid for rootfs
+    root_uuid=$(uuidgen)
+    
     # Create filesystems on partitions
     partition_char="$(if [[ ${disk: -1} == [0-9] ]]; then echo p; fi)"
     mkfs.vfat -F32 -n efi "${disk}${partition_char}1"
     dd if=/dev/zero of="${disk}${partition_char}2" bs=1KB count=10 > /dev/null
-    mkfs.ext4 -L root "${disk}${partition_char}2"
+    mkfs.ext4 -U "${root_uuid}" -L root "${disk}${partition_char}2"
 
     # Mount partitions
     mkdir -p ${mount_point}/{efi,root} 
     mount "${disk}${partition_char}1" ${mount_point}/efi
     mount "${disk}${partition_char}2" ${mount_point}/root
 
-    # Get rootfs UUID
-    fs_uuid=$(lsblk -ndo UUID "${disk}${partition_char}2")
-
     # Copy the rootfs to root partition
-    tar -xpf "${rootfs}" -C ${mount_point}/root
+    echo -e "Decompressing $(basename "${rootfs}")\n"
+    tar -xpJf "${rootfs}" -C ${mount_point}/root
 
     # Extract grub arm64-efi to host system 
     if [ ! -d "/usr/lib/grub/arm64-efi" ]; then
@@ -112,15 +121,15 @@ set timeout=10
 GRUB_RECORDFAIL_TIMEOUT=
 
 menuentry 'Boot' {
-    search --no-floppy --fs-uuid --set=root ${fs_uuid}
-    linux /boot/vmlinuz root=UUID=${fs_uuid} console=serial0,115200 console=tty1 rootfstype=ext4 rootwait rw
+    search --no-floppy --fs-uuid --set=root ${root_uuid}
+    linux /boot/vmlinuz root=UUID=${root_uuid} console=serial0,115200 console=tty1 rootfstype=ext4 rootwait rw
     initrd /boot/initrd.img
 }
 EOF
 
     # Uboot script
     cat > ${mount_point}/efi/boot.cmd << EOF
-env set bootargs "root=UUID=${fs_uuid} console=serial0,115200 console=tty1 rootfstype=ext4 rootwait rw"
+env set bootargs "root=UUID=${root_uuid} console=serial0,115200 console=tty1 rootfstype=ext4 rootwait rw"
 ext4load \${devtype} \${devnum}:2 \${ramdisk_addr_r} /boot/vmlinuz
 unzip \${ramdisk_addr_r} \${kernel_addr_r}
 ext4load \${devtype} \${devnum}:2 \${ramdisk_addr_r} /boot/initrd.img
@@ -190,14 +199,10 @@ EOF
     umount "${disk}${partition_char}1"
     umount "${disk}${partition_char}2"
 
-    # File system consistency check 
-    fsck.fat -a "${disk}${partition_char}1"
-    fsck.ext4 -pf "${disk}${partition_char}2"
-
     # Remove loop device
     losetup -d "${loop}"
 
-    echo "Compressing $(basename "${img}.xz")"
-    xz -0 --force --keep --quiet --threads=0 "${img}"
+    echo -e "\nCompressing $(basename "${img}.xz")\n"
+    xz -9 --extreme --force --keep --quiet --threads=0 "${img}"
     rm -f "${img}"
 done

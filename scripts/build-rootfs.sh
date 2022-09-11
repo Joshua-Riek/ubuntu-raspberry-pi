@@ -8,12 +8,23 @@ if [ "$(id -u)" -ne 0 ]; then
     exit 1
 fi
 
+cd "$(dirname -- "$(readlink -f -- "$0")")" && cd ..
 mkdir -p build && cd build
 
 if [ ! -d linux ]; then
     echo "Error: could not find the kernel source code, please run build-kernel.sh"
     exit 1
 fi
+
+# Download the raspberry pi firmware
+if [ ! -d firmware ]; then
+    git clone --depth 1 --progress -b stable https://github.com/raspberrypi/firmware.git 
+fi
+
+# These env vars can cause issues with chroot
+unset TMP
+unset TEMP
+unset TMPDIR
 
 # Debootstrap options
 arch=arm64
@@ -164,8 +175,8 @@ update_config=1
 country=US
 
 network={
-    ssid="your_home_ssid"
-    psk="your_home_psk"
+    ssid="Skynet_Global_Defense_Network"
+    psk="usf1991spc2019ucf2021"
     key_mgmt=WPA-PSK
     priority=1
 }
@@ -256,6 +267,16 @@ update-rc.d update-fstab.sh defaults
 update-rc.d expand-rootfs.sh defaults
 EOF
 
+# Copy userland firmware
+cp -ra firmware/opt ${chroot_dir}
+echo '/opt/vc/lib' > ${chroot_dir}/etc/ld.so.conf.d/00-vmcs.conf
+
+# Add firmware path to environment
+tmp_path="${PATH}"
+eval "$(cat ${chroot_dir}/etc/environment)"
+echo PATH="\"${PATH}:/opt/vc/bin"\" > ${chroot_dir}/etc/environment
+PATH="${tmp_path}"
+
 # Remove release upgrade motd
 rm -f ${chroot_dir}/var/lib/ubuntu-release-upgrader/release-upgrade-available
 
@@ -264,9 +285,10 @@ umount -lf ${chroot_dir}/dev/pts 2> /dev/null || true
 umount -lf ${chroot_dir}/* 2> /dev/null || true
 
 # Tar the entire rootfs
-cd ${chroot_dir} && tar -cpf ../ubuntu-20.04-preinstalled-server-arm64-pi4.rootfs.tar . && cd ..
+cd ${chroot_dir} && XZ_OPT="-0 -T0" tar -cpJf ../ubuntu-20.04-preinstalled-server-arm64-pi4.rootfs.tar.xz . && cd ..
 
 # Mount the temporary API filesystems
+mkdir -p ${chroot_dir}/{proc,sys,run,dev,dev/pts}
 mount -t proc /proc ${chroot_dir}/proc
 mount -t sysfs /sys ${chroot_dir}/sys
 mount -o bind /dev ${chroot_dir}/dev
@@ -501,7 +523,7 @@ umount -lf ${chroot_dir}/dev/pts 2> /dev/null || true
 umount -lf ${chroot_dir}/* 2> /dev/null || true
 
 # Tar the entire rootfs
-cd ${chroot_dir} && tar -cpf ../ubuntu-20.04-preinstalled-server-custom-arm64-pi4.rootfs.tar . && cd ..
+cd ${chroot_dir} && XZ_OPT="-0 -T0" tar -cpJf ../ubuntu-20.04-preinstalled-server-custom-arm64-pi4.rootfs.tar.xz . && cd ..
 
 # Mount the temporary API filesystems
 mkdir -p ${chroot_dir}/{proc,sys,run,dev,dev/pts}
@@ -514,6 +536,13 @@ mount -o bind /dev/pts ${chroot_dir}/dev/pts
 cat << EOF | chroot ${chroot_dir} /bin/bash
 set -eE 
 trap 'echo Error: in $0 on line $LINENO' ERR
+
+# Mesa packages
+DEBIAN_FRONTEND=noninteractive apt-get -y install libegl-mesa0 libgbm1 \
+libgl1-mesa-dev libgl1-mesa-dri libglapi-mesa libglx-mesa0 libosmesa6 \
+mesa-opencl-icd mesa-va-drivers mesa-vdpau-drivers mesa-vulkan-drivers \
+mesa-utils
+
 # Desktop packages
 DEBIAN_FRONTEND=noninteractive apt-get -y install ubuntu-desktop
 
@@ -653,9 +682,9 @@ umount -lf ${chroot_dir}/dev/pts 2> /dev/null || true
 umount -lf ${chroot_dir}/* 2> /dev/null || true
 
 # Tar the entire rootfs
-cd ${chroot_dir} && tar -cpf ../ubuntu-20.04-preinstalled-desktop-custom-arm64-pi4.rootfs.tar . && cd ..
+cd ${chroot_dir} && XZ_OPT="-0 -T0" tar -cpJf ../ubuntu-20.04-preinstalled-desktop-custom-arm64-pi4.rootfs.tar.xz . && cd ..
 rm -rf ${chroot_dir} && mkdir -p ${chroot_dir}
-cd ${chroot_dir} && tar -xpf ../ubuntu-20.04-preinstalled-server-arm64-pi4.rootfs.tar . && cd ..
+cd ${chroot_dir} && tar -xpJf ../ubuntu-20.04-preinstalled-server-arm64-pi4.rootfs.tar.xz . && cd ..
 
 # Mount the temporary API filesystems
 mkdir -p ${chroot_dir}/{proc,sys,run,dev,dev/pts}
@@ -668,6 +697,13 @@ mount -o bind /dev/pts ${chroot_dir}/dev/pts
 cat << EOF | chroot ${chroot_dir} /bin/bash
 set -eE 
 trap 'echo Error: in $0 on line $LINENO' ERR
+
+# Mesa packages
+DEBIAN_FRONTEND=noninteractive apt-get -y install libegl-mesa0 libgbm1 \
+libgl1-mesa-dev libgl1-mesa-dri libglapi-mesa libglx-mesa0 libosmesa6 \
+mesa-opencl-icd mesa-va-drivers mesa-vdpau-drivers mesa-vulkan-drivers \
+mesa-utils
+
 # Desktop packages
 DEBIAN_FRONTEND=noninteractive apt-get -y install ubuntu-desktop
 
@@ -680,4 +716,4 @@ umount -lf ${chroot_dir}/dev/pts 2> /dev/null || true
 umount -lf ${chroot_dir}/* 2> /dev/null || true
 
 # Tar the entire rootfs
-cd ${chroot_dir} && tar -cpf ../ubuntu-20.04-preinstalled-desktop-arm64-pi4.rootfs.tar . && cd ..
+cd ${chroot_dir} && XZ_OPT="-0 -T0" tar -cpJf ../ubuntu-20.04-preinstalled-desktop-arm64-pi4.rootfs.tar.xz . && cd ..

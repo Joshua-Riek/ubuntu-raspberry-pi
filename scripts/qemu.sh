@@ -19,13 +19,14 @@ if [ ! -f "${img}" ]; then
     exit 1
 fi
 
+cd "$(dirname -- "$(readlink -f -- "$0")")" && cd ..
 mkdir -p build && cd build && mkdir -p qemu
 
 # Decompress xz archive
 filename="$(basename "${img}")"
 if [ "${filename##*.}" == "xz" ]; then
-    xz -dc -T0 "${img}" > "${filename%.*}"
-    img="$(readlink -f "${filename%.*}")"
+    xz -dc -T0 "${img}" > "${img%.*}"
+    img="$(readlink -f "${img%.*}")"
 fi
 
 # Ensure img file
@@ -55,7 +56,7 @@ qemu-system-aarch64 \
 -device qemu-xhci \
 -device usb-kbd \
 -device usb-mouse \
--nographic \
+-device virtio-gpu-pci \
 -device virtio-net-pci,netdev=vnet \
 -device virtio-rng-pci,rng=rng0 \
 -device virtio-blk,drive=drive0,bootindex=0 \

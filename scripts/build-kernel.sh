@@ -8,6 +8,7 @@ if [ "$(id -u)" -ne 0 ]; then
     exit 1
 fi
 
+cd "$(dirname -- "$(readlink -f -- "$0")")" && cd ..
 mkdir -p build && cd build
 
 # Download the raspberry pi linux kernel source
@@ -16,17 +17,15 @@ if [ ! -d linux ]; then
 fi
 cd linux
 
-# Clean all and set defconfig
-make ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- distclean
+# Set kernel config 
 make ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- bcm2711_defconfig
-
-# Disable debug info
 ./scripts/config --disable CONFIG_DEBUG_INFO
 
 # Set custom kernel version
 ./scripts/config --enable CONFIG_LOCALVERSION_AUTO
 echo "-raspberry-pi4" > .scmversion
+echo "0" > .version
 
 # Compile kernel into deb package
-make ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- -j "$(nproc)" all
+make ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- -j "$(nproc)"
 make ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- -j "$(nproc)" bindeb-pkg

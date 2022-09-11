@@ -8,6 +8,7 @@ if [ "$(id -u)" -ne 0 ]; then
     exit 1
 fi
 
+cd "$(dirname -- "$(readlink -f -- "$0")")" && cd ..
 mkdir -p build && cd build
 
 # Download and build u-boot
@@ -17,7 +18,6 @@ fi
 cd u-boot
 
 # Clean all and set defconfig
-make ARCH=arm CROSS_COMPILE=aarch64-linux-gnu- distclean
 make ARCH=arm CROSS_COMPILE=aarch64-linux-gnu- rpi_4_defconfig
 
 # Compile u-boot binary

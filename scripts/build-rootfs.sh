@@ -43,12 +43,48 @@ qemu-debootstrap --arch ${arch} ${release} ${chroot_dir} ${mirror}
 
 # Use a more complete sources.list file 
 cat > ${chroot_dir}/etc/apt/sources.list << EOF
-deb ${mirror} ${release} main universe
-deb-src ${mirror} ${release} main universe
-deb ${mirror} ${release}-security main universe
-deb-src ${mirror} ${release}-security main universe
-deb ${mirror} ${release}-updates main universe
-deb-src ${mirror} ${release}-updates main universe
+# See http://help.ubuntu.com/community/UpgradeNotes for how to upgrade to
+# newer versions of the distribution.
+deb ${mirror} ${release} main restricted
+# deb-src ${mirror} ${release} main restricted
+
+## Major bug fix updates produced after the final release of the
+## distribution.
+deb ${mirror} ${release}-updates main restricted
+# deb-src ${mirror} ${release}-updates main restricted
+
+## N.B. software from this repository is ENTIRELY UNSUPPORTED by the Ubuntu
+## team. Also, please note that software in universe WILL NOT receive any
+## review or updates from the Ubuntu security team.
+deb ${mirror} ${release} universe
+# deb-src ${mirror} ${release} universe
+deb ${mirror} ${release}-updates universe
+# deb-src ${mirror} ${release}-updates universe
+
+## N.B. software from this repository is ENTIRELY UNSUPPORTED by the Ubuntu
+## team, and may not be under a free licence. Please satisfy yourself as to
+## your rights to use the software. Also, please note that software in
+## multiverse WILL NOT receive any review or updates from the Ubuntu
+## security team.
+deb ${mirror} ${release} multiverse
+# deb-src ${mirror} ${release} multiverse
+deb ${mirror} ${release}-updates multiverse
+# deb-src ${mirror} ${release}-updates multiverse
+
+## N.B. software from this repository may not have been tested as
+## extensively as that contained in the main release, although it includes
+## newer versions of some applications which may provide useful features.
+## Also, please note that software in backports WILL NOT receive any review
+## or updates from the Ubuntu security team.
+deb ${mirror} ${release}-backports main restricted universe multiverse
+# deb-src ${mirror} ${release}-backports main restricted universe multiverse
+
+deb ${mirror} ${release}-security main restricted
+# deb-src ${mirror} ${release}-security main restricted
+deb ${mirror} ${release}-security universe
+# deb-src ${mirror} ${release}-security universe
+deb ${mirror} ${release}-security multiverse
+# deb-src ${mirror} ${release}-security multiverse
 EOF
 
 # Mount the temporary API filesystems
@@ -226,44 +262,11 @@ update-rc.d expand-rootfs.sh remove
 END
 chmod +x ${chroot_dir}/etc/init.d/expand-rootfs.sh
 
-# Update fstab on first boot
-cat > ${chroot_dir}/etc/init.d/update-fstab.sh << 'EOF'
-#!/bin/bash
-### BEGIN INIT INFO
-# Provides: update-fstab.sh
-# Required-Start:
-# Required-Stop:
-# Default-Start: 2 3 4 5 S
-# Default-Stop:
-# Short-Description: Update default fstab
-# Description:
-### END INIT INFO
-
-# Get root block device and remove partition number
-disk="$(findmnt -n -o SOURCE / | sed "s/[0-9]*$//")"
-
-# Write the new fstab entries to the root device
-cat > /etc/fstab << END
-# <device> <dir>       <type>  <options>   <dump>  <fsck>
-${disk}1   /boot/efi   vfat    defaults    0       2
-${disk}2   /           ext4    defaults    0       1
-END
-
-# Remount according to fstab
-mkdir -p /boot/efi
-mount -a
-
-# Remove script
-update-rc.d update-fstab.sh remove
-EOF
-chmod +x ${chroot_dir}/etc/init.d/update-fstab.sh
-
 # Install init script
 cat << EOF | chroot ${chroot_dir} /bin/bash
 set -eE 
 trap 'echo Error: in $0 on line $LINENO' ERR
 
-update-rc.d update-fstab.sh defaults
 update-rc.d expand-rootfs.sh defaults
 EOF
 

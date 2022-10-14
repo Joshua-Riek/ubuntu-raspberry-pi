@@ -77,12 +77,15 @@ for rootfs in *.rootfs.tar.xz; do
 
     sleep 2
 
+    # Generate random uuid for bootfs
+    boot_uuid=$(uuidgen | head -c8)
+
     # Generate random uuid for rootfs
     root_uuid=$(uuidgen)
     
     # Create filesystems on partitions
     partition_char="$(if [[ ${disk: -1} == [0-9] ]]; then echo p; fi)"
-    mkfs.vfat -F32 -n efi "${disk}${partition_char}1"
+    mkfs.vfat -i "${boot_uuid}" -F32 -n efi "${disk}${partition_char}1"
     dd if=/dev/zero of="${disk}${partition_char}2" bs=1KB count=10 > /dev/null
     mkfs.ext4 -U "${root_uuid}" -L root "${disk}${partition_char}2"
 
@@ -94,6 +97,13 @@ for rootfs in *.rootfs.tar.xz; do
     # Copy the rootfs to root partition
     echo -e "Decompressing $(basename "${rootfs}")\n"
     tar -xpJf "${rootfs}" -C ${mount_point}/root
+
+    # Create fstab entries
+    mkdir -p ${mount_point}/root/boot/efi
+    boot_uuid="${boot_uuid:0:4}-${boot_uuid:4:4}"
+    echo "# <file system>      <mount point>  <type>  <options>   <dump>  <fsck>" > ${mount_point}/root/etc/fstab
+    echo "UUID=${boot_uuid^^}  /boot/efi      vfat    defaults    0       2" >> ${mount_point}/root/etc/fstab
+    echo "UUID=${root_uuid,,}  /              ext4    defaults    0       1" >> ${mount_point}/root/etc/fstab
 
     # Extract grub arm64-efi to host system 
     if [ ! -d "/usr/lib/grub/arm64-efi" ]; then

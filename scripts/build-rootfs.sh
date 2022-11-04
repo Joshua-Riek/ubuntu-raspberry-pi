@@ -225,6 +225,31 @@ network={
 }
 END
 
+# Serial console resize script
+cat > ${chroot_dir}/etc/profile.d/serial-console.sh << 'END'
+rsz() {
+    if [[ -t 0 && $# -eq 0 ]]; then
+        local IFS='[;' R escape geometry x y
+        echo -en '\e7\e[r\e[999;999H\e[6n\e8'
+        read -rsd R escape geometry
+        x="${geometry##*;}"; y="${geometry%%;*}"
+        if [[ "${COLUMNS}" -eq "${x}" && "${LINES}" -eq "${y}" ]]; then 
+            true
+        else 
+            stty cols "${x}" rows "${y}"
+        fi
+    else
+        echo 'Usage: rsz'
+    fi
+}
+case $(/usr/bin/tty) in
+    /dev/ttyAMA0|/dev/ttyS0|/dev/ttyGS0|/dev/ttyLP1)
+        export LANG=C
+        rsz
+        ;;
+esac
+END
+
 # Expand root filesystem on first boot
 cat > ${chroot_dir}/etc/init.d/expand-rootfs.sh << 'END'
 #!/bin/bash
@@ -309,6 +334,17 @@ i2c-tools u-boot-tools binfmt-support
 
 # Clean package cache
 apt-get -y autoremove && apt-get -y clean && apt-get -y autoclean
+EOF
+
+# Auto load g_serial
+echo "g_serial" >> ${chroot_dir}/etc/modules
+
+# Enable serial tty
+cat << EOF | chroot ${chroot_dir} /bin/bash
+set -eE 
+trap 'echo Error: in $0 on line $LINENO' ERR
+
+systemctl enable serial-getty@ttyGS0.service
 EOF
 
 # Terminal dircolors

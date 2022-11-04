@@ -211,8 +211,8 @@ update_config=1
 country=US
 
 network={
-    ssid="Skynet_Global_Defense_Network"
-    psk="usf1991spc2019ucf2021"
+    ssid="your_home_ssid"
+    psk="your_home_psk"
     key_mgmt=WPA-PSK
     priority=1
 }

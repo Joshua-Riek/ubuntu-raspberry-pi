@@ -18,7 +18,7 @@ fi
 
 # Download the raspberry pi firmware
 if [ ! -d firmware ]; then
-    git clone --depth 1 --progress -b stable https://github.com/raspberrypi/firmware.git 
+    git clone --depth 1 --progress -b 1.20220830 https://github.com/raspberrypi/firmware.git 
 fi
 
 # These env vars can cause issues with chroot

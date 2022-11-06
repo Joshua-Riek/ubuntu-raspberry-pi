@@ -13,7 +13,7 @@ mkdir -p build && cd build
 
 # Download the raspberry pi linux kernel source
 if [ ! -d linux ]; then
-    git clone --depth=1 --progress -b rpi-5.10.y https://github.com/raspberrypi/linux
+    git clone --depth=1 --progress -b 1.20220830 https://github.com/raspberrypi/linux
 fi
 cd linux
 

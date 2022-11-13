@@ -99,10 +99,10 @@ for rootfs in *.rootfs.tar.xz; do
     tar -xpJf "${rootfs}" -C ${mount_point}/root
 
     # Create fstab entries
-    mkdir -p ${mount_point}/root/boot/boot
+    mkdir -p ${mount_point}/root/boot/firmware
     boot_uuid="${boot_uuid:0:4}-${boot_uuid:4:4}"
     echo "# <file system>      <mount point>  <type>  <options>   <dump>  <fsck>" > ${mount_point}/root/etc/fstab
-    echo "UUID=${boot_uuid^^}  /boot/boot      vfat    defaults    0       2" >> ${mount_point}/root/etc/fstab
+    echo "UUID=${boot_uuid^^}  /boot/firmware vfat    defaults    0       2" >> ${mount_point}/root/etc/fstab
     echo "UUID=${root_uuid,,}  /              ext4    defaults    0       1" >> ${mount_point}/root/etc/fstab
 
     # Extract grub arm64-efi to host system 

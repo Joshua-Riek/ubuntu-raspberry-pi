@@ -1,6 +1,6 @@
 ## Overview
 
-This is a collection of scripts that are used to build a Ubuntu 20.04 preinstalled desktop/server image for the [Raspberry Pi 4](https://www.raspberrypi.com/products/raspberry-pi-4-model-b/).
+This is a collection of scripts that are used to build a Ubuntu 20.04 preinstalled desktop/server image for the Raspberry Pi 3, 3+, 4, and 400.
 
 ![Raspberry Pi 4](https://www.electromaker.io/uploads/images/board-guide/single-board-computer/medium/Raspberry%20Pi%204B-540x386.png)
 
@@ -29,8 +29,8 @@ udev dosfstools uuid-runtime grub-pc
 To checkout the source and build:
 
 ```
-git clone https://github.com/Joshua-Riek/ubuntu-raspberry-pi4.git
-cd ubuntu-raspberry-pi4
+git clone https://github.com/Joshua-Riek/ubuntu-raspberry-pi.git
+cd ubuntu-raspberry-pi
 sudo ./build.sh
 ```
 
@@ -39,7 +39,7 @@ sudo ./build.sh
 To run the Ubuntu 20.04 preinstalled image in a virtual machine:
 
 ```
-sudo ./qemu.sh images/ubuntu-20.04-preinstalled-server-arm64-pi4.img.xz
+sudo ./qemu.sh images/ubuntu-20.04-preinstalled-server-arm64-rpi.img.xz
 ```
 
 ## Login
@@ -47,9 +47,9 @@ sudo ./qemu.sh images/ubuntu-20.04-preinstalled-server-arm64-pi4.img.xz
 There are two predefined users on the system: `ubuntu` and `root`. The password for each is `root`. 
 
 ```
-Ubuntu 20.04.5 TLS raspberry-pi4 tty1
+Ubuntu 20.04.5 TLS raspberry-pi tty1
 
-raspberry-pi4 login: root
+raspberry-pi login: root
 Password: root
 ```
 
@@ -58,7 +58,7 @@ Password: root
 To flash the Ubuntu 20.04 preinstalled image to removable media:
 
 ```
-xz -dc images/ubuntu-20.04-preinstalled-server-arm64-pi4.img.xz | sudo dd of=/dev/sdX bs=4k
+xz -dc images/ubuntu-20.04-preinstalled-server-arm64-rpi.img.xz | sudo dd of=/dev/sdX bs=4k
 ```
 
 > This assumes that the removable media is added as /dev/sdX and all it’s partitions are unmounted.

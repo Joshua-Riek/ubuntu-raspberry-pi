@@ -62,7 +62,7 @@ for rootfs in *.rootfs.tar.xz; do
     (
     echo t
     echo 1
-    echo ef
+    echo c
     echo t
     echo 2
     echo 83
@@ -151,9 +151,13 @@ EOF
     # Raspberry pi config 
     cat > ${mount_point}/efi/config.txt << EOF
 [all]
-kernel=u-boot.bin
+kernel=u-boot-rpi-arm64.bin
+
+[pi3]
+kernel=u-boot-rpi-3.bin
 
 [pi4]
+kernel=u-boot-rpi-4.bin
 dtoverlay=vc4-kms-v3d-pi4
 max_framebuffers=2
 arm_boost=1
@@ -196,11 +200,13 @@ dtoverlay=dwc2,dr_mode=host
 [all]
 EOF
     # Copy uboot binary
-    cp u-boot/u-boot.bin ${mount_point}/efi
+    cp u-boot-rpi-3.bin ${mount_point}/efi
+    cp u-boot-rpi-4.bin ${mount_point}/efi
+    cp u-boot-rpi-arm64.bin ${mount_point}/efi
 
     # Copy raspberry pi firmware
     cp -r firmware/boot/* ${mount_point}/efi
-    rm -f ${mount_point}/efi/*.img
+    rm -f ${mount_point}/efi/{bcm2708*,bcm2709*,*.img}
 
     sync --file-system
     sync

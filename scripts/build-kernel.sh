@@ -23,7 +23,7 @@ make ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- bcm2711_defconfig
 
 # Set custom kernel version
 ./scripts/config --enable CONFIG_LOCALVERSION_AUTO
-echo "-raspberry-pi4" > .scmversion
+echo "-raspberry-pi" > .scmversion
 echo "0" > .version
 
 # Compile kernel into deb package

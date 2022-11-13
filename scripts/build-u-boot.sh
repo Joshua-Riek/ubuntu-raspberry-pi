@@ -18,7 +18,25 @@ fi
 cd u-boot
 
 # Clean all and set defconfig
+make ARCH=arm CROSS_COMPILE=aarch64-linux-gnu- distclean
 make ARCH=arm CROSS_COMPILE=aarch64-linux-gnu- rpi_4_defconfig
 
 # Compile u-boot binary
 make ARCH=arm CROSS_COMPILE=aarch64-linux-gnu- -j "$(nproc)"
+cp u-boot.bin ../u-boot-rpi-4.bin
+
+# Clean all and set defconfig
+make ARCH=arm CROSS_COMPILE=aarch64-linux-gnu- clean
+make ARCH=arm CROSS_COMPILE=aarch64-linux-gnu- rpi_3_defconfig
+
+# Compile u-boot binary
+make ARCH=arm CROSS_COMPILE=aarch64-linux-gnu- -j "$(nproc)"
+cp u-boot.bin ../u-boot-rpi-3.bin
+
+# Clean all and set defconfig
+make ARCH=arm CROSS_COMPILE=aarch64-linux-gnu- clean
+make ARCH=arm CROSS_COMPILE=aarch64-linux-gnu- rpi_arm64_defconfig
+
+# Compile u-boot binary
+make ARCH=arm CROSS_COMPILE=aarch64-linux-gnu- -j "$(nproc)"
+cp u-boot.bin ../u-boot-rpi-arm64.bin

@@ -124,7 +124,8 @@ bash-completion man-db manpages nano gnupg initramfs-tools linux-firmware \
 ubuntu-drivers-common ubuntu-server dosfstools mtools parted ntfs-3g zip atop \
 p7zip-full htop iotop pciutils lshw lsof cryptsetup exfat-fuse hwinfo dmidecode \
 net-tools wireless-tools openssh-client openssh-server wpasupplicant ifupdown \
-pigz wget curl grub-common grub2-common grub-efi-arm64 grub-efi-arm64-bin
+pigz wget curl grub-common grub2-common grub-efi-arm64 grub-efi-arm64-bin \
+libraspberrypi-bin
 
 # Clean package cache
 apt-get -y autoremove && apt-get -y clean && apt-get -y autoclean
@@ -174,7 +175,7 @@ EOF
 echo "nameserver 8.8.8.8" > ${chroot_dir}/etc/resolv.conf
 
 # Hostname
-echo "raspberry-pi4" > ${chroot_dir}/etc/hostname
+echo "raspberry-pi" > ${chroot_dir}/etc/hostname
 
 # Networking interfaces
 cat > ${chroot_dir}/etc/network/interfaces << END
@@ -195,7 +196,7 @@ END
 # Hosts file
 cat > ${chroot_dir}/etc/hosts << END
 127.0.0.1       localhost
-127.0.1.1       raspberry-pi4
+127.0.1.1       raspberry-pi
 
 ::1             localhost ip6-localhost ip6-loopback
 fe00::0         ip6-localnet
@@ -295,16 +296,6 @@ trap 'echo Error: in $0 on line $LINENO' ERR
 update-rc.d expand-rootfs.sh defaults
 EOF
 
-# Copy userland firmware
-cp -ra firmware/opt ${chroot_dir}
-echo '/opt/vc/lib' > ${chroot_dir}/etc/ld.so.conf.d/00-vmcs.conf
-
-# Add firmware path to environment
-tmp_path="${PATH}"
-eval "$(cat ${chroot_dir}/etc/environment)"
-echo PATH="\"${PATH}:/opt/vc/bin"\" > ${chroot_dir}/etc/environment
-PATH="${tmp_path}"
-
 # Remove release upgrade motd
 rm -f ${chroot_dir}/var/lib/ubuntu-release-upgrader/release-upgrade-available
 sed -i 's/^Prompt.*/Prompt=never/' ${chroot_dir}/etc/update-manager/release-upgrades
@@ -314,7 +305,7 @@ umount -lf ${chroot_dir}/dev/pts 2> /dev/null || true
 umount -lf ${chroot_dir}/* 2> /dev/null || true
 
 # Tar the entire rootfs
-cd ${chroot_dir} && XZ_OPT="-0 -T0" tar -cpJf ../ubuntu-20.04-preinstalled-server-arm64-pi4.rootfs.tar.xz . && cd ..
+cd ${chroot_dir} && XZ_OPT="-0 -T0" tar -cpJf ../ubuntu-20.04-preinstalled-server-arm64-rpi.rootfs.tar.xz . && cd ..
 
 # Mount the temporary API filesystems
 mkdir -p ${chroot_dir}/{proc,sys,run,dev,dev/pts}
@@ -563,7 +554,7 @@ umount -lf ${chroot_dir}/dev/pts 2> /dev/null || true
 umount -lf ${chroot_dir}/* 2> /dev/null || true
 
 # Tar the entire rootfs
-cd ${chroot_dir} && XZ_OPT="-0 -T0" tar -cpJf ../ubuntu-20.04-preinstalled-server-custom-arm64-pi4.rootfs.tar.xz . && cd ..
+cd ${chroot_dir} && XZ_OPT="-0 -T0" tar -cpJf ../ubuntu-20.04-preinstalled-server-custom-arm64-rpi.rootfs.tar.xz . && cd ..
 
 # Mount the temporary API filesystems
 mkdir -p ${chroot_dir}/{proc,sys,run,dev,dev/pts}
@@ -722,9 +713,9 @@ umount -lf ${chroot_dir}/dev/pts 2> /dev/null || true
 umount -lf ${chroot_dir}/* 2> /dev/null || true
 
 # Tar the entire rootfs
-cd ${chroot_dir} && XZ_OPT="-0 -T0" tar -cpJf ../ubuntu-20.04-preinstalled-desktop-custom-arm64-pi4.rootfs.tar.xz . && cd ..
+cd ${chroot_dir} && XZ_OPT="-0 -T0" tar -cpJf ../ubuntu-20.04-preinstalled-desktop-custom-arm64-rpi.rootfs.tar.xz . && cd ..
 rm -rf ${chroot_dir} && mkdir -p ${chroot_dir}
-cd ${chroot_dir} && tar -xpJf ../ubuntu-20.04-preinstalled-server-arm64-pi4.rootfs.tar.xz . && cd ..
+cd ${chroot_dir} && tar -xpJf ../ubuntu-20.04-preinstalled-server-arm64-rpi.rootfs.tar.xz . && cd ..
 
 # Mount the temporary API filesystems
 mkdir -p ${chroot_dir}/{proc,sys,run,dev,dev/pts}
@@ -756,4 +747,4 @@ umount -lf ${chroot_dir}/dev/pts 2> /dev/null || true
 umount -lf ${chroot_dir}/* 2> /dev/null || true
 
 # Tar the entire rootfs
-cd ${chroot_dir} && XZ_OPT="-0 -T0" tar -cpJf ../ubuntu-20.04-preinstalled-desktop-arm64-pi4.rootfs.tar.xz . && cd ..
+cd ${chroot_dir} && XZ_OPT="-0 -T0" tar -cpJf ../ubuntu-20.04-preinstalled-desktop-arm64-rpi.rootfs.tar.xz . && cd ..

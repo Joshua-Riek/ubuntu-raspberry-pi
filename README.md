@@ -1,6 +1,6 @@
 ## Overview
 
-This is a collection of scripts that are used to build a Ubuntu 20.04 preinstalled desktop/server image for the Raspberry Pi 3, 3+, 4, and 400.
+This is a collection of scripts that are used to build a Ubuntu 20.04 preinstalled desktop/server image for the Raspberry Pi Zero 2W, 3, 4, and 400.
 
 ![Raspberry Pi 4](https://www.electromaker.io/uploads/images/board-guide/single-board-computer/medium/Raspberry%20Pi%204B-540x386.png)
 
@@ -52,7 +52,7 @@ Ubuntu 20.04.5 TLS raspberry-pi tty1
 raspberry-pi login: root
 Password: root
 ```
-
+xz -dc images/ubuntu-20.04-preinstalled-server-arm64-rpi.img.xz | sudo dd of=/dev/sda bs=4k
 ## Flash Removable Media
 
 To flash the Ubuntu 20.04 preinstalled image to removable media:

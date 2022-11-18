@@ -226,6 +226,17 @@ network={
 }
 END
 
+# Sapfile
+cat << EOF | chroot ${chroot_dir} /bin/bash
+set -eE 
+trap 'echo Error: in $0 on line $LINENO' ERR
+
+dd if=/dev/zero of=/tmp/swapfile bs=1024 count=2097152
+chmod 600 /tmp/swapfile
+mkswap /tmp/swapfile
+mv /tmp/swapfile /swapfile
+EOF
+
 # Serial console resize script
 cat > ${chroot_dir}/etc/profile.d/serial-console.sh << 'END'
 rsz() {

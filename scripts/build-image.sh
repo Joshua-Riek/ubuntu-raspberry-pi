@@ -104,6 +104,7 @@ for rootfs in *.rootfs.tar.xz; do
     echo "# <file system>      <mount point>  <type>  <options>   <dump>  <fsck>" > ${mount_point}/root/etc/fstab
     echo "UUID=${boot_uuid^^}  /boot/firmware vfat    defaults    0       2" >> ${mount_point}/root/etc/fstab
     echo "UUID=${root_uuid,,}  /              ext4    defaults    0       1" >> ${mount_point}/root/etc/fstab
+    echo "/swapfile            none           swap    sw          0       0" >> ${mount_point}/root/etc/fstab
 
     # Extract grub arm64-efi to host system 
     if [ ! -d "/usr/lib/grub/arm64-efi" ]; then

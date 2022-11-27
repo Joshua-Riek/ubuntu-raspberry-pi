@@ -52,7 +52,7 @@ Ubuntu 20.04.5 TLS raspberry-pi tty1
 raspberry-pi login: root
 Password: root
 ```
-xz -dc images/ubuntu-20.04-preinstalled-server-arm64-rpi.img.xz | sudo dd of=/dev/sda bs=4k
+
 ## Flash Removable Media
 
 To flash the Ubuntu 20.04 preinstalled image to removable media:

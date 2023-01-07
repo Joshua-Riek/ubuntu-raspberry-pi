@@ -265,7 +265,7 @@ rsz() {
 }
 
 case $(/usr/bin/tty) in
-    /dev/ttyAMA0|/dev/ttyS0|/dev/ttyGS0/dev/ttyLP1)
+    /dev/ttyAMA0|/dev/ttyS0|/dev/ttyGS0|/dev/ttyLP1)
         rsz
         ;;
 esac

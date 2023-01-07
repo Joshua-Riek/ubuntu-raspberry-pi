@@ -241,22 +241,26 @@ EOF
 cat > ${chroot_dir}/etc/profile.d/serial-console.sh << 'END'
 rsz() {
     if [[ -t 0 && $# -eq 0 ]]; then
-        local IFS='[;' R escape geometry x y
+        local IFS='[;' escape geometry x y
         echo -en '\e7\e[r\e[999;999H\e[6n\e8'
-        read -rsd R escape geometry
+		read -t 5 -sd R escape geometry || return 1
         x="${geometry##*;}"; y="${geometry%%;*}"
         if [[ "${COLUMNS}" -eq "${x}" && "${LINES}" -eq "${y}" ]]; then 
-            true
-        else 
+			return 0
+        elif [[ "$x" -gt 0 && "$y" -gt 0 ]]; then
             stty cols "${x}" rows "${y}"
+            return 0
+        else
+            return 1
         fi
     else
         echo 'Usage: rsz'
+        return 1
     fi
 }
+
 case $(/usr/bin/tty) in
-    /dev/ttyAMA0|/dev/ttyS0|/dev/ttyGS0|/dev/ttyLP1)
-        export LANG=C
+    /dev/ttyAMA0|/dev/ttyS0|/dev/ttyGS0/dev/ttyLP1)
         rsz
         ;;
 esac

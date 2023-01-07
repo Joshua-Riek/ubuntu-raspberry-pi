@@ -58,7 +58,7 @@ Password: root
 To flash the Ubuntu 20.04 preinstalled image to removable media:
 
 ```
-xz -dc images/ubuntu-20.04-preinstalled-server-arm64-rpi.img.xz | sudo dd of=/dev/sdX bs=4k
+xz -dc images/ubuntu-20.04-preinstalled-desktop-arm64-rpi.tar.xz | sudo dd of=/dev/sdX bs=4k
 ```
 
 > This assumes that the removable media is added as /dev/sdX and all it’s partitions are unmounted.

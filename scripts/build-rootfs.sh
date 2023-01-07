@@ -317,6 +317,9 @@ echo "g_serial" >> ${chroot_dir}/etc/modules
 # Enable serial tty
 chroot ${chroot_dir} /bin/bash -c "systemctl enable serial-getty@ttyGS0.service"
 
+# Set term for serial tty
+sed -i '/ExecStart.*/i Environment="TERM=linux"' ${chroot_dir}/lib/systemd/system/serial-getty@.service
+
 # Remove release upgrade motd
 rm -f ${chroot_dir}/var/lib/ubuntu-release-upgrader/release-upgrade-available
 sed -i 's/^Prompt.*/Prompt=never/' ${chroot_dir}/etc/update-manager/release-upgrades

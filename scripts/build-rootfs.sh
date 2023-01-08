@@ -183,7 +183,7 @@ echo "nameserver 8.8.8.8" > ${chroot_dir}/etc/resolv.conf
 echo "raspberry-pi" > ${chroot_dir}/etc/hostname
 
 # Networking interfaces
-cat > ${chroot_dir}/etc/network/interfaces << END
+cat > ${chroot_dir}/etc/network/interfaces << EOF
 auto lo
 iface lo inet loopback
 
@@ -196,10 +196,10 @@ iface enp0s3 inet dhcp
 allow-hotplug wlan0
 iface wlan0 inet dhcp
     wpa-conf /etc/wpa_supplicant/wpa_supplicant.conf
-END
+EOF
 
 # Hosts file
-cat > ${chroot_dir}/etc/hosts << END
+cat > ${chroot_dir}/etc/hosts << EOF
 127.0.0.1       localhost
 127.0.1.1       raspberry-pi
 
@@ -208,10 +208,10 @@ fe00::0         ip6-localnet
 ff02::1         ip6-allnodes
 ff02::2         ip6-allrouters
 ff02::3         ip6-allhosts
-END
+EOF
 
 # WIFI
-cat > ${chroot_dir}/etc/wpa_supplicant/wpa_supplicant.conf << END
+cat > ${chroot_dir}/etc/wpa_supplicant/wpa_supplicant.conf << EOF
 ctrl_interface=DIR=/var/run/wpa_supplicant GROUP=netdev
 update_config=1
 country=US
@@ -229,7 +229,7 @@ network={
     key_mgmt=WPA-PSK
     priority=2
 }
-END
+EOF
 
 # Sapfile
 cat << EOF | chroot ${chroot_dir} /bin/bash
@@ -243,7 +243,7 @@ mv /tmp/swapfile /swapfile
 EOF
 
 # Serial console resize script
-cat > ${chroot_dir}/etc/profile.d/serial-console.sh << 'END'
+cat > ${chroot_dir}/etc/profile.d/serial-console.sh << 'EOF'
 rsz() {
     if [[ -t 0 && $# -eq 0 ]]; then
         local IFS='[;' escape geometry x y
@@ -269,10 +269,10 @@ case $(/usr/bin/tty) in
         rsz
         ;;
 esac
-END
+EOF
 
 # Expand root filesystem on first boot
-cat > ${chroot_dir}/etc/init.d/expand-rootfs.sh << 'END'
+cat > ${chroot_dir}/etc/init.d/expand-rootfs.sh << 'EOF'
 #!/bin/bash
 ### BEGIN INIT INFO
 # Provides: expand-rootfs.sh
@@ -305,7 +305,7 @@ fi
 
 # Remove script
 update-rc.d expand-rootfs.sh remove
-END
+EOF
 chmod +x ${chroot_dir}/etc/init.d/expand-rootfs.sh
 
 # Install init script

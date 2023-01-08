@@ -318,7 +318,9 @@ echo "g_serial" >> ${chroot_dir}/etc/modules
 chroot ${chroot_dir} /bin/bash -c "systemctl enable serial-getty@ttyGS0.service"
 
 # Set term for serial tty
-sed -i '/ExecStart.*/i Environment="TERM=linux"' ${chroot_dir}/lib/systemd/system/serial-getty@.service
+mkdir -p ${chroot_dir}/lib/systemd/system/serial-getty@.service.d
+echo "[Service]" > ${chroot_dir}/lib/systemd/system/serial-getty@.service.d/10-term.conf
+echo "Environment=TERM=linux" >> ${chroot_dir}/lib/systemd/system/serial-getty@.service.d/10-term.conf
 
 # Remove release upgrade motd
 rm -f ${chroot_dir}/var/lib/ubuntu-release-upgrader/release-upgrade-available
